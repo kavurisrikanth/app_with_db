@@ -1,0 +1,15 @@
+/* CSS file for app. */
+
+@import url("https://fonts.googleapis.com/css?family=Rammetto+One");
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+body {
+    align-content: center;
+    text-align: center;
+}
+
+.main_heading {
+	font-family: Lato;
+	color: steelblue;
+}
