@@ -1,9 +1,9 @@
 # This file controls the database functionality.
 
 import sqlalchemy
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 
 '''
 Create the database.
@@ -19,12 +19,22 @@ class User(Base):
 	
 	id = Column(Integer, primary_key=True)
 	name = Column(String)
-	email = Column(String)
 	password = Column(String)
 	
+	addresses = relationship('Address', back_populates='user', cascade='all, delete, delete-orphan')
+
 	def __repr__(self):
 		return "<User(id: '%s', name: '%s', email:'%s', password: '%s')>" % (self.id, self.name, self.email, self.password)
 		
+class Address(Base):
+	__tablename__ = 'addresses'
+
+	id = Column(Integer, primary_key=True)
+	email = Column(String, nullable=False)
+	user_id = Column(Integer, ForeignKey('users.id'))
+
+	user = relationship('User', back_populates='addresses')
+
 Session = None
 
 '''
@@ -39,7 +49,8 @@ def create_table(engine):
 Add data to database.
 '''
 def ins(name, email, pwd):
-	new_user = User(name=name, email=email, password=pwd)
+	new_user = User(name=name, password=pwd)
+	new_user.addresses = [Address(email=email)]
 	session = Session()
 	session.add(new_user)
 	session.commit()
@@ -60,12 +71,12 @@ def view(name):
 '''
 Deletes records based on email address (?)
 '''
-def rem(email):
+def rem(name):
 	session = Session()
-	res_user = session.query(User).filter(User.email == email).first()
+	res_user = session.query(User).filter(User.name == name).first()
 	if res_user == None:
-		raise Exception('Email "%s" does not exist!' % email)
+		raise Exception('Record with name "%s" does not exist!' % name)
 	else:
-		session.query(User).filter(User.email == email).delete()
+		session.delete(res_user)
 		session.commit()
 	session.close()
